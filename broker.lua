@@ -23,7 +23,7 @@ end
 
 -- actions
 local function switch_power(m, pl)
-	if pl == "on" then
+	if pl == "ON" then
 		gpio.write(GPIO_SWITCH, gpio.HIGH)
 		print("MQTT : plug ON for ", MQTT_CLIENTID)
 	else
@@ -35,10 +35,10 @@ end
 local function toggle_power()
 	if gpio.read(GPIO_SWITCH) == gpio.HIGH then
 		gpio.write(GPIO_SWITCH, gpio.LOW)
-		m:publish(MQTT_MAINTOPIC .. '/power', "off", 0, 1)
+		m:publish(MQTT_MAINTOPIC .. '/stat/power', "OFF", 0, 1)
 	else
 		gpio.write(GPIO_SWITCH, gpio.HIGH)
-		m:publish(MQTT_MAINTOPIC .. '/power', "on", 0, 1)
+		m:publish(MQTT_MAINTOPIC .. '/stat/power', "ON", 0, 1)
     end
 end
 
@@ -68,5 +68,5 @@ end)
 gpio.mode(GPIO_SWITCH, gpio.OUTPUT)
 gpio.mode(GPIO_BUTTON, gpio.INT)
 gpio.trig(GPIO_BUTTON, 'down', debounce(toggle_power))
-dispatcher[MQTT_MAINTOPIC .. '/power'] = switch_power
+dispatcher[MQTT_MAINTOPIC .. '/cmd/power'] = switch_power
 m:connect(MQTT_HOST, MQTT_PORT, 0, 1)
