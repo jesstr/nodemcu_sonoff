@@ -21,5 +21,10 @@ MQTT_MAINTOPIC = "/" .. MQTT_CLIENTID
 MQTT_USERNAME = ""
 MQTT_PASSWORD = ""
 
+-- OTHERS
+BUTTON_DEBOUNCE = 500000
+TELNET_MODULE = 1 -- 1 to active
+
+
 -- Confirmation message
 print("\nGlobal variables loaded...\n")
