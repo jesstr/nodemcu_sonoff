@@ -11,7 +11,7 @@ FW=./fw//nodemcu-master-21-modules-2017-03-20-19-10-23-float.bin
 files=(
 broker.lua
 config.lua
-ota.lua
+http.lua
 page.tmpl
 telnet.lua
 init.lua
@@ -34,7 +34,7 @@ echo "Clearing..."
 sudo $LUATOOL -p $PORT -b $BAUD --wipe
 echo
 
-sleep 2
+sleep 3
 
 #Do upload
 for fname in ${files[@]}; do

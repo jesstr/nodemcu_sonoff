@@ -83,7 +83,7 @@ function wifi_watch()
         load_lib("broker")
     elseif status == wifi.STA_GOTIP and wifiReady == 1 then
         if firstPass == 0 then
-            load_lib("ota")
+            load_lib("http")
             firstPass = 1
             tmr.stop(WIFI_LED_BLINK_ALARM_ID)
             turnWiFiLedOn()
