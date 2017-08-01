@@ -1,11 +1,24 @@
--- init all globals
+-- safe library load
 function load_lib(fname)
-    if file.open(fname .. ".lc") then
-        file.close()
-        dofile(fname .. ".lc")
-    else
-        dofile(fname .. ".lua")
+    function try_load(fname)
+        if file.open(fname) then
+            file.close()
+            local ret, err = pcall(function() dofile(fname) end)
+            if ret == false then
+                print(fname .. " -- load failed!")
+                print(err)
+            end
+            return ret
+        else
+            return false
+        end
     end
+
+    if try_load(fname..".lc") then return true end
+    if try_load(fname..".lua") then return true end
+    
+    print(fname .. ".lua/.lc -- not found!")
+    return false
 end
 
 -- get table length
@@ -17,7 +30,10 @@ function tablelen(table)
     return n
 end
 
-load_lib("config")
+-- init all globals
+if not load_lib("config") then
+    load_lib("default_config")
+end
 
 local ssid, pass = nil
 local wifiReady = 0
