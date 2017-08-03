@@ -32,6 +32,7 @@ local function switch_power(m, pl)
 end
 
 local function toggle_power()
+    LedBlink(100)
 	if gpio.read(GPIO_SWITCH) == gpio.HIGH then
 		gpio.write(GPIO_SWITCH, gpio.LOW)
 		m:publish(MQTT_MAINTOPIC .. '/state/power', "OFF", 0, 1)
@@ -58,6 +59,7 @@ end)
 m:on('message', function(m, topic, pl)
 	print('MQTT : Topic ', topic, ' with payload ', pl)
 	if pl~=nil and dispatcher[topic] then
+        LedBlink(50)
 		dispatcher[topic](m, pl)
 	end
 end)

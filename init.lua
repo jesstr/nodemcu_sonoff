@@ -79,7 +79,7 @@ function wifi_watch()
     if status == wifi.STA_GOTIP and wifiReady == 0 then
         wifiReady = 1
         print("WiFi: connected with " .. wifi.sta.getip())
-        LedFlickerStop()
+        LedBlink(400)
         if TELNET_MODULE == 1 then
             load_lib("telnet")
         end
