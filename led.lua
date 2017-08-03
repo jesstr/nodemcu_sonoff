@@ -40,7 +40,6 @@ local function Flick(t)
         flkr_state = 0
         return
     end
-    flkr_cnt = flkr_cnt - 1
     if flkr_state == 1 then
         flkr_state = 2
         LedOn()
@@ -49,25 +48,27 @@ local function Flick(t)
         LedOff()
         flkr_state = 1
         delay = flkr_pause
+        flkr_cnt = flkr_cnt - 1
     end
     tmr.alarm(t, delay, tmr.ALARM_SINGLE, Flick)
 end
 
--- Run LED flicker 
+-- Run LED flicker
 function LedFlicker(pulse, pause, count)
-    if count > 0 and flkr_state == 0 then
-        flkr_cnt = count * 2
-        flkr_state = 1
+    if count > 0  then
+        flkr_cnt = count
         if pulse < 50 then pulse = 50 end
         if pause < 50 then pause = 50 end
         flkr_pause = pause
         flkr_pulse = pulse
-        Flick(WIFI_LED_BLINK_ALARM_ID)
+        if flkr_state == 0 then
+            flkr_state = 1
+            Flick(WIFI_LED_BLINK_ALARM_ID)
+        end
     end
 end
 
-
--- Disable LED flicker 
+-- Disable LED flicker
 function LedFlickerStop()
     flkr_state = 0
     tmr.unregister(WIFI_LED_BLINK_ALARM_ID)
