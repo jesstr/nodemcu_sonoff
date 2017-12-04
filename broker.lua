@@ -1,4 +1,5 @@
 local dispatcher = {}
+local connected = false
 
 -- client activation
 if m == nil then
@@ -32,13 +33,21 @@ local function switch_power(m, pl)
 end
 
 local function toggle_power()
-    LedBlink(100)
+    local msg
 	if gpio.read(GPIO_SWITCH) == gpio.HIGH then
 		gpio.write(GPIO_SWITCH, gpio.LOW)
-		m:publish(MQTT_MAINTOPIC .. '/state/power', "OFF", 0, 1)
+        msg = "OFF"
 	else
 		gpio.write(GPIO_SWITCH, gpio.HIGH)
-		m:publish(MQTT_MAINTOPIC .. '/state/power', "ON", 0, 1)
+        msg = "ON"
+    end
+    if connected then
+        m:publish(MQTT_MAINTOPIC .. '/state/power', msg, 0, 1)
+        print("MQTT (online): " .. msg)
+        LedBlink(100)
+    else
+        print("MQTT (offline): " .. msg)
+        LedFlicker(100, 100, 2)
     end
 end
 
@@ -47,12 +56,21 @@ m:lwt('/lwt', MQTT_CLIENTID .. " died !", 0, 0)
 
 m:on('connect', function(m)
 	print('MQTT : ' .. MQTT_CLIENTID .. " connected to : " .. MQTT_HOST .. " on port : " .. MQTT_PORT)
-	m:subscribe(MQTT_MAINTOPIC .. '/#', 0, function (m)
+	m:subscribe(MQTT_MAINTOPIC .. '/cmd/#', 0, function (m)
 		print('MQTT : subscribed to ', MQTT_MAINTOPIC) 
 	end)
+    connected = true
+    local msg
+    if gpio.read(GPIO_SWITCH) == gpio.HIGH then
+        msg = "ON"
+    else
+        msg = "OFF"
+    end
+    m:publish(MQTT_MAINTOPIC .. '/state/power', msg, 0, 1)
 end)
 
 m:on('offline', function(m)
+    connected = false
 	print('MQTT : disconnected from ', MQTT_HOST)
 end)
 
