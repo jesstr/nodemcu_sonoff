@@ -47,7 +47,6 @@ local function toggle_power()
         LedBlink(100)
     else
         print("MQTT (offline): " .. msg)
-        LedFlicker(100, 100, 2)
     end
 end
 
@@ -90,6 +89,7 @@ end)
 
 m:on('offline', function(m)
     connected = false
+    LedFlicker(1000, 2000, UNLIM_FLICK)
     print('MQTT : disconnected from ', MQTT_HOST)
 end)
 
