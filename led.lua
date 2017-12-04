@@ -1,9 +1,10 @@
+UNLIM_FLICK = 0xFFFF
+
 local ledOn = false
 local flkr_cnt = 0
 local flkr_pause = 0
 local flkr_pulse = 0
 local flkr_state = 0
-
 
 -- Set LED state ON
 function LedOn()
@@ -50,6 +51,9 @@ local function Flick(t)
         LedOff()
         flkr_state = 1
         delay = flkr_pause
+        if flkr_cnt ~= UNLIM_FLICK then
+            flkr_cnt = flkr_cnt - 1
+        end
     end
     tmr.alarm(t, delay, tmr.ALARM_SINGLE, Flick)
 end
