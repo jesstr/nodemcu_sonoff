@@ -59,7 +59,11 @@ m:on('connect', function(m)
 	m:subscribe(MQTT_MAINTOPIC .. '/cmd/#', 0, function (m)
 		print('MQTT : subscribed to ', MQTT_MAINTOPIC) 
 	end)
+
     connected = true
+    LedFlickerStop()
+
+    --Last switch state report
     local msg
     if gpio.read(GPIO_SWITCH) == gpio.HIGH then
         msg = "ON"
@@ -67,11 +71,26 @@ m:on('connect', function(m)
         msg = "OFF"
     end
     m:publish(MQTT_MAINTOPIC .. '/state/power', msg, 0, 1)
+
+    --Service messages publish
+    tmr.alarm(PUBLISH_ALARM_ID, 60000, 1, function ()
+        if connected == true then
+            LedBlink(50)
+            time = tmr.time()
+            dd = time / (3600 * 24)
+            hh = (time / 3600) % 24
+            mm = (time / 60) % 60
+            local str = string.format("%dd %dh %dm", dd, hh, mm)
+            --print("Uptime: "..str)
+            m:publish("/"..MQTT_CLIENTID.."/state/uptime", str, 0, 1, nil)
+            m:publish("/"..MQTT_CLIENTID.."/state/ip", wifi.sta.getip(), 0, 1, nil)
+        end
+    end)
 end)
 
 m:on('offline', function(m)
     connected = false
-	print('MQTT : disconnected from ', MQTT_HOST)
+    print('MQTT : disconnected from ', MQTT_HOST)
 end)
 
 m:on('message', function(m, topic, pl)
