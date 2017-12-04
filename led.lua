@@ -21,6 +21,7 @@ end
 function LedBlink(ms)
     LedOn()
     tmr.alarm(WIFI_LED_BLINK_ALARM_ID, ms, tmr.ALARM_SINGLE, LedOff)
+    flkr_state = 0
 end
 
 -- Toggle LED state
