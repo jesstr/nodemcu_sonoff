@@ -1,11 +1,15 @@
 #!/bin/bash
 
-FW=./nodemcu-master-21-modules-2017-03-20-19-10-23-float.bin
-PORT=/dev/ttyUSB0 
+FW=nodemcu-master-22-modules-2018-05-27-13-21-02-float.bin
+DEFPORT=/dev/ttyUSB0 
 
-if [ -z $FW ]; then
-    echo "FW file is empty"
+PORT=${1:-$DEFPORT}
+
+FILE=$(cd `dirname $0` && pwd)/$FW
+
+if [ ! -f $FILE ]; then
+    echo "Firmware file $FILE not found"
     exit
 fi
 
-sudo esptool.py --port $PORT write_flash -fm qio 0x00000 $FW
+sudo esptool.py --port $PORT write_flash -fm qio 0x00000 $FILE
