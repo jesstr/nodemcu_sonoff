@@ -30,6 +30,8 @@ function tablelen(table)
     return n
 end
 
+load_lib("gpio")
+
 -- init all globals
 if not load_lib("config") then
     load_lib("default_config")
@@ -51,10 +53,14 @@ function connectWiFi(ssid_list)
     end
     if ssid ~= nil then
         print("Connecting to "..ssid)
-        wifi.sta.config(ssid, pass)
+        -- New wifi module API used since nodemcu fw pull request #1497
+        station_cfg={}
+        station_cfg.ssid = ssid
+        station_cfg.pwd = pass
+        wifi.sta.config(station_cfg)
         tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
     else
-        print("SSID not found")
+        print("No SSIDs found")
         LedFlicker(50, 100, 5)
     end
 end
@@ -80,15 +86,19 @@ function wifi_watch()
         wifiReady = 1
         print("WiFi: connected with " .. wifi.sta.getip())
         LedBlink(400)
-        if TELNET_MODULE == 1 then
-            load_lib("telnet")
-        end
-        load_lib("broker")
-    elseif status == wifi.STA_GOTIP and wifiReady == 1 then
+        --run modules on first start only
         if firstPass == 0 then
-            load_lib("http")
+            if TELNET_MODULE == 1 then
+                load_lib("telnet")
+            end
+            if HTTP_MODULE == 1 then
+                load_lib("http")
+            end
+            load_lib("start")
             firstPass = 1
         end
+    elseif status == wifi.STA_GOTIP and wifiReady == 1 then
+        --pass
     else
         wifiReady = 0
         LedFlicker(50, 500, 10)
