@@ -1,7 +1,9 @@
 #!/bin/bash
 
 FW=nodemcu-master-22-modules-2018-05-27-13-21-02-float.bin
-DEFPORT=/dev/ttyUSB0 
+DEFPORT=/dev/ttyUSB0
+BAUD=250000
+ESPTOOL=esptool.py
 
 PORT=${1:-$DEFPORT}
 
@@ -12,4 +14,4 @@ if [ ! -f $FILE ]; then
     exit
 fi
 
-sudo esptool.py --port $PORT write_flash -fm qio 0x00000 $FILE
+$ESPTOOL --port $PORT --baud $BAUD write_flash -fm qio 0x00000 $FILE
