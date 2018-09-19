@@ -71,8 +71,8 @@ end)
 
 --Interpret the command
 m:on("message", function(m,t,pl)
-    print("PAYLOAD: ", pl)
-    print("TOPIC: ", t)
+    print("PAYLOAD: " .. pl)
+    print("TOPIC: " .. t)
     
     --Run command handler
     if pl~=nil and m_dis[t] then
@@ -104,33 +104,36 @@ function debounce(func)
     end
 end
 
+local function state_pub(m, msg)
+    if online then
+        m:publish(MQTT_MAINTOPIC .. '/state/power', msg, 0, 1)
+        print("MQTT (online): " .. msg)
+        LedBlink(100)
+    else
+        print("MQTT (offline): " .. msg)
+    end
+end
+
 local function switch_power(m, pl)
 	if pl == "ON" or pl == "1" then
-		gpio.write(GPIO_SWITCH, gpio.HIGH)
-		print("MQTT : plug ON for ", MQTT_CLIENTID)
+        gpio.write(GPIO_SWITCH, gpio.HIGH)
+		print("MQTT: plug ON for " .. MQTT_CLIENTID)
+        state_pub(m, "ON")
 	elseif pl == "OFF" or pl == "0" then
 		gpio.write(GPIO_SWITCH, gpio.LOW)
-		print("MQTT : plug OFF for ", MQTT_CLIENTID)
-	end
+        print("MQTT: plug OFF for " .. MQTT_CLIENTID)
+        state_pub(m, "OFF")
+    end
 end
 
 local function toggle_power()
-    local msg
-    local status = "offline"
 	if gpio.read(GPIO_SWITCH) == gpio.HIGH then
 		gpio.write(GPIO_SWITCH, gpio.LOW)
-        msg = "OFF"
+        state_pub(m, "OFF")
 	else
 		gpio.write(GPIO_SWITCH, gpio.HIGH)
-        msg = "ON"
+        state_pub(m, "ON")
     end
-    if online then
-        m:publish(MQTT_MAINTOPIC .. '/state/power', msg, 0, 1)
-        LedBlink(100)
-        status = "online"
-    end
-    local str = string.format("MQTT (%s): %s", status, msg)
-    print(str)
 end
 
 
